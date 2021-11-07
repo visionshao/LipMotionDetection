@@ -22,7 +22,7 @@ shape_predictor = "model/shape_predictor_68_face_landmarks.dat"
 # define lip region
 (lipFrom, lipTo) = (49, 68)
 # define video path
-videoPath = "video/test.mp4"
+videoPath = "video/G0001/V11_20150707142849_52654320.mp4"
 # define threshold for lip motion
 threshold = 0.6
 
@@ -70,15 +70,15 @@ while True:
                 cv2.putText(frame, "Mouth is Open!", (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)
 
         # write into output video
-        out.write(frame)
+        # out.write(frame)
         # show the frame
-        # cv2.imshow("Frame", frame)
+        cv2.imshow("Frame", frame)
         # control imshow lasting time  Explaination: https://juejin.cn/post/6870776834926051342
-        # key = cv2.waitKey(1) & 0xFF
+        key = cv2.waitKey(1) & 0xFF
 
         # quit
-        # if key == ord("q"):
-        #     break
+        if key == ord("q"):
+            break
     else: 
         break
 
