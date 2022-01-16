@@ -23,19 +23,6 @@ SHAPE_PREDICTOR = "model/shape_predictor_68_face_landmarks.dat"
 THRESHOLD = 0.65
 
 
-# load json info
-with open(JSONPATH,'r', encoding='utf-8') as load_f:
-    load_dict = json.load(load_f)
-# record speaking period
-duration = []
-for recored in load_dict:
-    start = recored['start time']
-    end = recored['end time']
-    duration.append((start, end))
-# print(duration)
-# exit()
-
-
 # define the face detector
 DETECTOR = dlib.get_frontal_face_detector()
 # define a shape predictor
@@ -45,9 +32,11 @@ PREDICTOR = dlib.shape_predictor(SHAPE_PREDICTOR)
 # read original video
 # fvs = FileVideoStream(path=VIDEOPATH).start()
 VC = cv2.VideoCapture(VIDEOPATH)
+FRAME_RATE = VC.get(cv2.CAP_PROP_FPS)
+print(FRAME_RATE)
 # define output video
-frame_width = int(VC.get(cv2.CAP_PROP_FRAME_WIDTH))
-frame_height = int(VC.get(cv2.CAP_PROP_FRAME_HEIGHT))
+FRAME_WIDTH = int(VC.get(cv2.CAP_PROP_FRAME_WIDTH))
+FRAME_HEIGHT = int(VC.get(cv2.CAP_PROP_FRAME_HEIGHT))
 # out = cv2.VideoWriter('video/out_dlib.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 30, (frame_width,frame_height))
 
 
@@ -97,36 +86,13 @@ def process_frame(frame):
     return Lars, frame
 
 
-for (start, end) in duration:
-    t = int(start - 1) * 1000
-    LARs = []
-    while t < int(end + 1)  * 1000:
-        VC.set(cv2.CAP_PROP_POS_MSEC, t)
-        rval, frame = VC.read()
-        if rval:
-            lar, frame = process_frame(frame)
-            # plt.imshow(frame)
-        else:
-            lar = [0]
-        LARs = LARs + lar
-        t += 100
-    
-    x = np.arange(int(start - 1) * 10, int(end + 1) * 10)
-    plt.plot(x, LARs,'o-')
-    plt.xlabel('time')
-    plt.ylabel('lar')
-    plt.show()
-
-exit()
-
-
 start = time.time()
 
 while (VC.isOpened()):
     # read frames
     rval, frame = VC.read()
     if rval:
-        frame = process_frame(frame)
+        Lars, frame = process_frame(frame)
 
         # write into output video
         # out.write(frame)
