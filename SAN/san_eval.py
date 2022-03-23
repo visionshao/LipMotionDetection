@@ -18,11 +18,8 @@ import datasets
 from visualization import draw_image_by_points
 from san_vision import transforms
 from utils import time_string, time_for_file, get_model_infos
-import dlib
-import cv2
 
 os.environ["CUDA_VISIBLE_DEVICES"]='0'
-DETECTOR = dlib.get_frontal_face_detector()
 
 def evaluate(args):
   if not args.cpu:
@@ -34,20 +31,6 @@ def evaluate(args):
   print ('The model is {:}'.format(args.model))
   snapshot = Path(args.model)
   assert snapshot.exists(), 'The model path {:} does not exist'
-  if args.face == None:
-    im = cv2.imread(args.image)
-    frame_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-    rects = DETECTOR(frame_gray, 0)
-    if len(rects) == 0:
-      print('Fail to find a face!')
-      return
-    else:
-      left = rects[1].tl_corner().x
-      top = rects[1].tl_corner().y
-      right = rects[1].br_corner().x
-      bottom = rects[1].br_corner().y
-      print(left, top, right, bottom)
-      args.face = [left, top, right, bottom]
   print ('The face bounding box is {:}'.format(args.face))
   assert len(args.face) == 4, 'Invalid face input : {:}'.format(args.face)
   
@@ -94,8 +77,10 @@ def evaluate(args):
 
   locations[:, 0], locations[:, 1] = locations[:, 0] * scale_w + cropped_size[2], locations[:, 1] * scale_h + cropped_size[3]
   prediction = np.concatenate((locations, scores), axis=1).transpose(1,0)
+  shape = []
   for i in range(param.num_pts):
     point = prediction[:, i]
+    shape.append([round(point[0]), round(point[1])])
     print ('The coordinate of {:02d}/{:02d}-th points : ({:.1f}, {:.1f}), score = {:.3f}'.format(i, param.num_pts, float(point[0]), float(point[1]), float(point[2])))
 
   if args.save_path:
@@ -103,6 +88,8 @@ def evaluate(args):
     image.save( args.save_path )
     print ('save image with landmarks into {:}'.format(args.save_path))
   print('finish san evaluation on a single image : {:}'.format(args.image))
+  print(shape)
+  return shape
 
 
 if __name__ == '__main__':
@@ -113,6 +100,4 @@ if __name__ == '__main__':
   parser.add_argument('--save_path',        type=str,   help='The path to save the visualization results')
   parser.add_argument('--cpu',     action='store_true', help='Use CPU or not.')
   args = parser.parse_args()
-  print(args)
-  print('//////////////////////////////////////////////////////////')
   evaluate(args)
