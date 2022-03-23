@@ -30,4 +30,5 @@ SAN/__pycache__/
 *.pdf
 SAN/datasets/
 video
+processed_media
 frame.jpg
