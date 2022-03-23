@@ -13,6 +13,8 @@ from os import path as osp
 import numbers, numpy as np
 import init_path
 import torch
+import dlib
+import cv2
 import models
 import datasets
 from visualization import draw_image_by_points
@@ -20,6 +22,47 @@ from san_vision import transforms
 from utils import time_string, time_for_file, get_model_infos
 
 os.environ["CUDA_VISIBLE_DEVICES"]='0'
+# define the face detector
+DETECTOR = dlib.get_frontal_face_detector()
+# define lip region
+(LIPFROM, LIPTO) = (49, 68)
+
+# calculate lip aspect ratio
+def lip_aspect_ratio(lip):
+
+    # left top to left bottom
+    A = np.linalg.norm(lip[2] - lip[9])  # 51, 59
+    # right top to right bottom
+    B = np.linalg.norm(lip[4] - lip[7])  # 53, 57
+    # leftest to rightest
+    C = np.linalg.norm(lip[0] - lip[6])  # 49, 55
+    lar = (A + B) / (2.0 * C)
+
+    return lar
+
+class SAN_Args():
+    def __init__(self, image, face=None, save_path=None, cpu=False):
+        self.image = image
+        self.model = 'SAN/snapshots/SAN_300W_GTB_itn_cpm_3_50_sigma4_128x128x8/checkpoint_49.pth.tar'
+        self.face = face
+        self.locate_face()
+        self.save_path = save_path
+        self.cpu = cpu
+    
+    def locate_face(self):
+        if self.face == None:
+            img = cv2.imread(self.image)
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            rects = DETECTOR(img_rgb, 0)
+            if len(rects) == 0:
+                print('Fail to find a face!')
+            else:
+                rect = rects[0]
+                left = rect.tl_corner().x
+                top = rect.tl_corner().y
+                right = rect.br_corner().x
+                bottom = rect.br_corner().y
+                self.face = [left, top, right, bottom]
 
 def evaluate(args):
   if not args.cpu:
@@ -88,7 +131,10 @@ def evaluate(args):
     image.save( args.save_path )
     print ('save image with landmarks into {:}'.format(args.save_path))
   print('finish san evaluation on a single image : {:}'.format(args.image))
-  print(shape)
+  # locate lip region
+  lip = shape[LIPFROM:LIPTO]
+  # get lip aspect ratio
+  lar = lip_aspect_ratio(lip)
   return shape
 
 
