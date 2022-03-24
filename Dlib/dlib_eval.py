@@ -78,19 +78,22 @@ def process_frame(frame):
 # process input
 def execute(args):
     # image input
-    if args.input_type == 'IMAGE':
+    if args.input_type.upper() == 'IMAGE':
         img = cv2.imread(args.input)
         _, img = process_frame(img)
         cv2.imwrite(args.save_path + os.path.basename(args.input), img)
+        cv2.imshow("Image", img)
     # video input
-    elif args.input_type == 'VIDEO':
+    elif args.input_type.upper() == 'VIDEO':
         # read original video
         VC = cv2.VideoCapture(args.input)
         FRAME_RATE = VC.get(cv2.CAP_PROP_FPS)
         # define output video
         FRAME_WIDTH = int(VC.get(cv2.CAP_PROP_FRAME_WIDTH))
         FRAME_HEIGHT = int(VC.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        out = cv2.VideoWriter(args.save_path + os.path.basename(args.input), cv2.VideoWriter_fourcc('M','J','P','G'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
+        (_, tempfilename) = os.path.split(args.input)
+        (filename, _) = os.path.splitext(tempfilename)
+        out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
         # process video
         while (VC.isOpened()):
             # read frames
@@ -98,6 +101,7 @@ def execute(args):
             if rval:
                 _, frame = process_frame(frame)
                 # write into output video
+                frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT), interpolation = cv2.INTER_AREA)
                 out.write(frame)
                 # show the frame
                 cv2.imshow("Frame", frame)
@@ -112,3 +116,4 @@ def execute(args):
         # cleanup
         cv2.destroyAllWindows()
         VC.release()
+        out.release()
