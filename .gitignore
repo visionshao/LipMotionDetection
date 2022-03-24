@@ -29,6 +29,6 @@ SAN/__pycache__/
 *.zip
 *.pdf
 SAN/datasets/
-video
+media
 processed_media
 frame.jpg
