@@ -72,7 +72,6 @@ class SAN_Args():
                 # read frames
                 rval, frame = VC.read()
                 if rval:
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     cv2.imwrite('frame.jpg', frame)
                     args = Args(image='frame.jpg')
                     _, frame = evaluate(args)
@@ -185,18 +184,17 @@ def evaluate(args):
     lar = lip_aspect_ratio(lip)
     # image = draw_image_by_points(args.image, prediction, 1, (255,0,0), False, False)
     img = cv2.imread(args.image)
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     lip_shape = cv2.convexHull(lip)
-    cv2.drawContours(img_rgb, [lip_shape], -1, (0, 255, 0), 1)
+    cv2.drawContours(img, [lip_shape], -1, (0, 255, 0), 1)
     if lar > HIGH_THRESHOLD or lar < LOW_THRESHOLD:
-        cv2.putText(img_rgb, "Lip Motion Detected!", (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)                
+        cv2.putText(img, "Lip Motion Detected!", (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)                
     if args.save_path:
-        cv2.imwrite(args.save_path + os.path.basename(args.image), img_rgb)
+        cv2.imwrite(args.save_path + os.path.basename(args.image), img)
         # print ('save image with landmarks into {:}'.format(args.save_path + os.path.basename(args.input)))
     print(lar)
     print('finish san evaluation on a single image : {:}'.format(args.image))
 
-    return lar, img_rgb
+    return lar, img
 
 
 if __name__ == '__main__':
