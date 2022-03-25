@@ -25,7 +25,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]='0'
 # define the face detector
 DETECTOR = dlib.get_frontal_face_detector()
 # define lip region
-(LIPFROM, LIPTO) = (49, 68)
+(LIPFROM, LIPTO) = (48, 68)
 # define threshold for lip motion
 HIGH_THRESHOLD = 0.65
 LOW_THRESHOLD = 0.4
@@ -54,51 +54,41 @@ class SAN_Args():
         if self.input_type.upper() == 'IMAGE':
             args = Args(image=self.input, save_path=self.save_path)
             _, img = evaluate(args)
-            cv2.imwrite(args.save_path + os.path.basename(args.input), img)
             cv2.imshow("Image", img)
         else:
             # read original video
-            VC = cv2.VideoCapture(args.input)
+            VC = cv2.VideoCapture(self.input)
             FRAME_RATE = VC.get(cv2.CAP_PROP_FPS)
             # define output video
             FRAME_WIDTH = int(VC.get(cv2.CAP_PROP_FRAME_WIDTH))
             FRAME_HEIGHT = int(VC.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            (_, tempfilename) = os.path.split(args.input)
+            (_, tempfilename) = os.path.split(self.input)
             (filename, _) = os.path.splitext(tempfilename)
-            out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
+            out = cv2.VideoWriter(self.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
             # process video
             while (VC.isOpened()):
                 # read frames
                 rval, frame = VC.read()
                 if rval:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     cv2.imwrite('frame.jpg', frame)
-                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    rects = DETECTOR(frame_rgb, 0)
-                    if len(rects) == 0:
-                        print('Fail to find a face!')
-                    else:
-                        rect = rects[0]
-                        left = rect.tl_corner().x
-                        top = rect.tl_corner().y
-                        right = rect.br_corner().x
-                        bottom = rect.br_corner().y
-                        face = [left, top, right, bottom]
-                        args = Args(image='frame.jpg', face=face)
-                        _, frame = evaluate(args)
-                        frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT), interpolation = cv2.INTER_AREA)
-                        out.write(frame)
-                        # show the frame
-                        cv2.imshow("Frame", frame)
-                        # control imshow lasting time
-                        key = cv2.waitKey(1) & 0xFF
-                        # quit
-                        if key == ord("q"):
-                            break
+                    args = Args(image='frame.jpg')
+                    _, frame = evaluate(args)
+                    frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT), interpolation = cv2.INTER_AREA)
+                    out.write(frame)
+                    # show the frame
+                    cv2.imshow("Frame", frame)
+                    # control imshow lasting time
+                    key = cv2.waitKey(1) & 0xFF
+                    # quit
+                    if key == ord("q"):
+                        break
                 else:
                     break
             # cleanup
             cv2.destroyAllWindows()
-        VC.release()
+            os.remove('frame.jpg')
+            VC.release()
 
 
 class Args():
@@ -191,15 +181,20 @@ def evaluate(args):
     lip = shape[LIPFROM:LIPTO]
     # get lip aspect ratio
     lar = lip_aspect_ratio(lip)
-    image = draw_image_by_points(args.image, prediction, 1, (255,0,0), False, False)
+    # image = draw_image_by_points(args.image, prediction, 1, (255,0,0), False, False)
+    img = cv2.imread(args.image)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    lip_shape = cv2.convexHull(lip)
+    cv2.drawContours(img_rgb, [lip_shape], -1, (0, 255, 0), 1)
     if lar > HIGH_THRESHOLD or lar < LOW_THRESHOLD:
-        cv2.putText(image, "Lip Motion Detected!", (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)                
+        cv2.putText(img_rgb, "Lip Motion Detected!", (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)                
     if args.save_path:
-        image.save( args.save_path + os.path.basename(args.input) )
+        cv2.imwrite(args.save_path + os.path.basename(args.image), img_rgb)
         # print ('save image with landmarks into {:}'.format(args.save_path + os.path.basename(args.input)))
+    print(lar)
     print('finish san evaluation on a single image : {:}'.format(args.image))
 
-    return lar, image
+    return lar, img_rgb
 
 
 if __name__ == '__main__':

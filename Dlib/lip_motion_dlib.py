@@ -18,7 +18,7 @@ JSONPATH = "video/" + FILE_NAME + ".json"
 # use 68 key points face model
 SHAPE_PREDICTOR = "model/shape_predictor_68_face_landmarks.dat"
 # define lip region
-(LIPFROM, LIPTO) = (49, 68)
+(LIPFROM, LIPTO) = (48, 68)
 # define threshold for lip motion
 THRESHOLD = 0.65
 
