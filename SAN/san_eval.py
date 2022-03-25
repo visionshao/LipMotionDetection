@@ -51,10 +51,12 @@ class SAN_Args():
         self.save_path = save_path
     
     def execute(self):
+        # image input
         if self.input_type.upper() == 'IMAGE':
             args = Args(image=self.input, save_path=self.save_path)
             _, img = evaluate(args)
             cv2.imshow("Image", img)
+        # video input
         else:
             # read original video
             VC = cv2.VideoCapture(self.input)

@@ -4,6 +4,7 @@ import imutils
 import dlib
 import cv2
 import os
+from datetime import datetime
 
 
 # use 68 key points face model
@@ -93,6 +94,39 @@ def execute(args):
         FRAME_HEIGHT = int(VC.get(cv2.CAP_PROP_FRAME_HEIGHT))
         (_, tempfilename) = os.path.split(args.input)
         (filename, _) = os.path.splitext(tempfilename)
+        out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
+        # process video
+        while (VC.isOpened()):
+            # read frames
+            rval, frame = VC.read()
+            if rval:
+                _, frame = process_frame(frame)
+                # write into output video
+                frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT), interpolation = cv2.INTER_AREA)
+                out.write(frame)
+                # show the frame
+                cv2.imshow("Frame", frame)
+                # control imshow lasting time
+                key = cv2.waitKey(1) & 0xFF
+                # quit
+                if key == ord("q"):
+                    break
+            else: 
+                break
+
+        # cleanup
+        cv2.destroyAllWindows()
+        VC.release()
+        out.release()
+    # camera input
+    else:
+        # activate the camera
+        VC = cv2.VideoCapture(0)
+        FRAME_RATE = 30
+        FRAME_WIDTH = 640
+        FRAME_HEIGHT = 380
+        now = datetime.now()
+        filename = now.strftime("Camera_%Y%m%d_%H%M%S")
         out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
         # process video
         while (VC.isOpened()):
