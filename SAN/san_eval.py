@@ -56,6 +56,8 @@ class SAN_Args():
             args = Args(image=self.input, save_path=self.save_path)
             _, img = evaluate(args)
             cv2.imshow("Image", img)
+            cv2.waitKey(1000)
+            cv2.destroyAllWindows()
         # video input
         else:
             # read original video
