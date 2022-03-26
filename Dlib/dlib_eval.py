@@ -84,6 +84,8 @@ def execute(args):
         _, img = process_frame(img)
         cv2.imwrite(args.save_path + os.path.basename(args.input), img)
         cv2.imshow("Image", img)
+        cv2.waitKey(1000)
+        cv2.destroyAllWindows()
     # video input
     elif args.input_type.upper() == 'VIDEO':
         # read original video

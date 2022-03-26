@@ -11,7 +11,13 @@ window = tk.Tk()
 # set title
 window.title('Lip Motion Detection')
 # set window size
-window.geometry('650x500')
+sw = window.winfo_screenwidth()
+sh = window.winfo_screenheight()
+ww = 650
+wh = 500
+x = int((sw-ww) / 2)
+y = int((sh-wh) / 2)
+window.geometry(f"{ww}x{wh}+{x}+{y}")
 
 
 # select processing method
@@ -23,6 +29,9 @@ def set_Dlib():
     r_btn_input_3['state'] = 'normal'
 def set_SAN():
     r_btn_input_3['state'] = 'disabled'
+    if input_type.get() == 'Camera':
+        input_type.set('Image')
+        set_Image()
 # radiobutton_method
 method_type.set('Dlib')
 r_btn_method_1 = tk.Radiobutton(window, font=('Arial', 14), text='Dlib', variable=method_type, value='Dlib', command=set_Dlib)
@@ -37,13 +46,23 @@ label_input = tk.Label(window, font=('Arial', 14), text='2. Please select the in
 label_input.place(x=10, y=100)
 label_input_notice = tk.Label(window, font=('Arial', 14), text='  (NOTICE that SAN now does NOT support camera input.)')
 label_input_notice.place(x=10, y=125)
+# input selection function
+def set_Image():
+    entry_upload_path['state'] = 'normal'
+    btn_upload['state'] = 'normal'
+def set_Video():
+    entry_upload_path['state'] = 'normal'
+    btn_upload['state'] = 'normal'
+def set_Camera():
+    entry_upload_path['state'] = 'disabled'
+    btn_upload['state'] = 'disabled'
 # radiobutton_input
-input_type.set('image')
-r_btn_input_1 = tk.Radiobutton(window, font=('Arial', 14), text='Image', variable=input_type, value='image')
+input_type.set('Image')
+r_btn_input_1 = tk.Radiobutton(window, font=('Arial', 14), text='Image', variable=input_type, value='Image', command=set_Image)
 r_btn_input_1.place(x=100, y=155)
-r_btn_input_2 = tk.Radiobutton(window, font=('Arial', 14), text='Video', variable=input_type, value='video')
+r_btn_input_2 = tk.Radiobutton(window, font=('Arial', 14), text='Video', variable=input_type, value='Video', command=set_Video)
 r_btn_input_2.place(x=250, y=155)
-r_btn_input_3 = tk.Radiobutton(window, font=('Arial', 14), text='Camera', variable=input_type, value='camera')
+r_btn_input_3 = tk.Radiobutton(window, font=('Arial', 14), text='Camera', variable=input_type, value='Camera', command=set_Camera)
 r_btn_input_3.place(x=400, y=155)
 
 
@@ -77,6 +96,16 @@ def precess():
     else:
         args = san_eval.SAN_Args(input_type=input_type.get(), input=upload_path.get(), save_path=saved_path.get())
         args.execute()
+    topw, toph = 210, 100
+    ctpx = int(sw / 2 - topw / 2)
+    ctpy = int(sh / 2 - toph / 2)
+    top = tk.Toplevel(window)
+    top.geometry(f"{topw}x{toph}+{ctpx}+{ctpy}")
+    top.title('Notice')
+    finish_top = tk.Label(top, font=('Arial', 14), text=' Process completed. ')
+    finish_top.place(x=10, y=10)
+    btn_ok = tk.Button(top, font=('Arial', 14), text="OK", width=8, command=top.destroy)
+    btn_ok.place(x=55, y=50)
 
 btn_process = tk.Button(window, font=('Arial', 14), text="Process", width=10, command=precess)
 btn_process.place(x=120, y=370)
