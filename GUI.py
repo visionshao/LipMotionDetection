@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.filedialog
 from Dlib import dlib_eval
+import time
 import sys
 sys.path.append('SAN')
 import san_eval
@@ -69,7 +70,6 @@ r_btn_input_3.place(x=400, y=155)
 # upload media
 def selectPath():
     path_ = tkinter.filedialog.askopenfilename()
-    # path_ = path_.replace("/","\\\\")
     upload_path.set(path_)
 upload_path = tk.StringVar()
 label_upload = tk.Label(window, text = "3. File Path:", font=('Arial', 14))
@@ -92,20 +92,29 @@ entry_saved_path.place(x=140, y=317, width=350)
 def precess():
     if method_type.get() == 'Dlib':
         args = dlib_eval.Dlib_Args(input_type=input_type.get(), input=upload_path.get(), save_path=saved_path.get())
+        start = time.time()
         dlib_eval.execute(args)
+        end = time.time()
     else:
         args = san_eval.SAN_Args(input_type=input_type.get(), input=upload_path.get(), save_path=saved_path.get())
+        start = time.time()
         args.execute()
-    topw, toph = 210, 100
+        end = time.time()
+    seconds = end - start
+    hour = int(seconds / 3600)
+    minute = int(seconds % 3600 / 60)
+    second = int(seconds % 60)
+    topw, toph = 300, 100
     ctpx = int(sw / 2 - topw / 2)
     ctpy = int(sh / 2 - toph / 2)
     top = tk.Toplevel(window)
     top.geometry(f"{topw}x{toph}+{ctpx}+{ctpy}")
     top.title('Notice')
-    finish_top = tk.Label(top, font=('Arial', 14), text=' Process completed. ')
+    finish_top = tk.Label(top, font=('Arial', 14), text= str(hour) + 'h:' + str(minute) + "m:" + str(second) + 's. ')
+    # finish_top = tk.Label(top, font=('Arial', 14), text=' Process completed in ' + str(hour) + 'h:' + str(minute) + "m:" + str(second) + 's. ')
     finish_top.place(x=10, y=10)
     btn_ok = tk.Button(top, font=('Arial', 14), text="OK", width=8, command=top.destroy)
-    btn_ok.place(x=55, y=50)
+    btn_ok.place(x=90, y=50)
 
 btn_process = tk.Button(window, font=('Arial', 14), text="Process", width=10, command=precess)
 btn_process.place(x=120, y=370)
