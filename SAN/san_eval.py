@@ -15,6 +15,7 @@ import init_path
 import torch
 import dlib
 import cv2
+from datetime import datetime
 import models
 import datasets
 from visualization import draw_image_by_points
@@ -51,11 +52,15 @@ class SAN_Args():
         self.save_path = save_path
     
     def execute(self):
+        (_, tempfilename) = os.path.split(self.input)
+        (filename, _) = os.path.splitext(tempfilename)
         # image input
         if self.input_type.upper() == 'IMAGE':
             args = Args(image=self.input, save_path=self.save_path)
             _, img = evaluate(args)
-            cv2.imshow("Image", img)
+            now = datetime.now()
+            filename = filename + '_SAN' + now.strftime("%Y%m%d_%H%M%S")
+            cv2.imshow(args.save_path + filename + '.jpg', img)
             cv2.waitKey(1000)
             cv2.destroyAllWindows()
         # video input
@@ -66,9 +71,10 @@ class SAN_Args():
             # define output video
             FRAME_WIDTH = int(VC.get(cv2.CAP_PROP_FRAME_WIDTH))
             FRAME_HEIGHT = int(VC.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            (_, tempfilename) = os.path.split(self.input)
-            (filename, _) = os.path.splitext(tempfilename)
-            out = cv2.VideoWriter(self.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
+            now = datetime.now()
+            filename = filename + '_SAN' + now.strftime("%Y%m%d_%H%M%S")
+            out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
+            f=open(args.save_path + "LARs_SAN.txt","w")
             # process video
             while (VC.isOpened()):
                 # read frames
@@ -76,22 +82,28 @@ class SAN_Args():
                 if rval:
                     cv2.imwrite('frame.jpg', frame)
                     args = Args(image='frame.jpg')
-                    _, frame = evaluate(args)
+                    lar, frame = evaluate(args)
+                    # record lar
+                    f.write(str(lar)+'\n')
+                    # write into output video
                     frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT), interpolation = cv2.INTER_AREA)
                     out.write(frame)
-                    # show the frame
-                    cv2.imshow("Frame", frame)
-                    # control imshow lasting time
-                    key = cv2.waitKey(1) & 0xFF
-                    # quit
-                    if key == ord("q"):
-                        break
+                    # # show the frame
+                    # cv2.imshow("Frame", frame)
+                    # # control imshow lasting time
+                    # key = cv2.waitKey(1) & 0xFF
+                    # # quit
+                    # if key == ord("q"):
+                    #     break
                 else:
                     break
             # cleanup
             cv2.destroyAllWindows()
             os.remove('frame.jpg')
             VC.release()
+            out.release()
+            f.close()
+
 
 
 class Args():

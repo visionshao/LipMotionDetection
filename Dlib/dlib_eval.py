@@ -52,9 +52,8 @@ def process_frame(frame):
     # detect face rect
     rects = DETECTOR(frame_gray, 0)
 
-    Lars = []
-
-    for rect in rects:
+    if len(rects):
+        rect = rects[0]
         # find key points inside the face rect
         shape = PREDICTOR(frame_gray, rect)
         shape = face_utils.shape_to_np(shape)
@@ -63,7 +62,6 @@ def process_frame(frame):
         lip = shape[LIPFROM:LIPTO]
         # get lip aspect ratio
         lar = lip_aspect_ratio(lip)
-        Lars.append(lar)
 
         # get the shape of lip
         lip_shape = cv2.convexHull(lip)
@@ -72,17 +70,23 @@ def process_frame(frame):
         # if open
         if lar > HIGH_THRESHOLD or lar < LOW_THRESHOLD:
             cv2.putText(frame, "Lip Motion Detected!", (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)                
+    else:
+        print('No face found!')
 
-    return Lars, frame
+    return lar, frame
 
 
 # process input
 def execute(args):
+    (_, tempfilename) = os.path.split(args.input)
+    (filename, _) = os.path.splitext(tempfilename)
     # image input
     if args.input_type.upper() == 'IMAGE':
         img = cv2.imread(args.input)
         _, img = process_frame(img)
-        cv2.imwrite(args.save_path + os.path.basename(args.input), img)
+        now = datetime.now()
+        filename = filename + '_Dlib' + now.strftime("%Y%m%d_%H%M%S")
+        cv2.imwrite(args.save_path + filename + '_Dlib' + '.jpg', img)
         cv2.imshow("Image", img)
         cv2.waitKey(1000)
         cv2.destroyAllWindows()
@@ -94,15 +98,18 @@ def execute(args):
         # define output video
         FRAME_WIDTH = int(VC.get(cv2.CAP_PROP_FRAME_WIDTH))
         FRAME_HEIGHT = int(VC.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        (_, tempfilename) = os.path.split(args.input)
-        (filename, _) = os.path.splitext(tempfilename)
+        now = datetime.now()
+        filename = filename + '_Dlib' + now.strftime("%Y%m%d_%H%M%S")
         out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
+        f=open(args.save_path + "LARs_Dlib.txt","w")
         # process video
         while (VC.isOpened()):
             # read frames
             rval, frame = VC.read()
             if rval:
-                _, frame = process_frame(frame)
+                lar, frame = process_frame(frame)
+                # record lar
+                f.write(str(lar)+'\n')
                 # write into output video
                 frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT), interpolation = cv2.INTER_AREA)
                 out.write(frame)
@@ -120,6 +127,7 @@ def execute(args):
         cv2.destroyAllWindows()
         VC.release()
         out.release()
+        f.close()
     # camera input
     else:
         # activate the camera
@@ -128,7 +136,7 @@ def execute(args):
         FRAME_WIDTH = 640
         FRAME_HEIGHT = 380
         now = datetime.now()
-        filename = now.strftime("Camera_%Y%m%d_%H%M%S")
+        filename = 'Camera_Dlib_' + now.strftime("%Y%m%d_%H%M%S")
         out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
         # process video
         while (VC.isOpened()):
