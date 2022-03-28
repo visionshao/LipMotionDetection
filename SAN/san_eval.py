@@ -16,6 +16,7 @@ import torch
 import dlib
 import cv2
 from datetime import datetime
+import imutils
 import models
 import datasets
 from visualization import draw_image_by_points
@@ -50,19 +51,24 @@ class SAN_Args():
         self.input_type = input_type
         self.input = input
         self.save_path = save_path
-    
+
     def execute(self):
         (_, tempfilename) = os.path.split(self.input)
         (filename, _) = os.path.splitext(tempfilename)
         # image input
         if self.input_type.upper() == 'IMAGE':
-            args = Args(image=self.input, save_path=self.save_path)
+            temp_img = cv2.imread(self.input)
+            temp_img = imutils.resize(temp_img, width=640)
+            cv2.imwrite('temp.jpg', temp_img)
+            args = Args(image='temp.jpg')
             _, img = evaluate(args)
             now = datetime.now()
-            filename = filename + '_SAN' + now.strftime("%Y%m%d_%H%M%S")
-            cv2.imshow(args.save_path + filename + '.jpg', img)
+            filename = filename + now.strftime("_%Y%m%d_%H%M%S_") + 'SAN'
+            cv2.imwrite(self.save_path + filename + '.jpg', img)
+            cv2.imshow("Image", img)
             cv2.waitKey(1000)
             cv2.destroyAllWindows()
+            os.remove('temp.jpg')
         # video input
         else:
             # read original video
@@ -72,14 +78,15 @@ class SAN_Args():
             FRAME_WIDTH = int(VC.get(cv2.CAP_PROP_FRAME_WIDTH))
             FRAME_HEIGHT = int(VC.get(cv2.CAP_PROP_FRAME_HEIGHT))
             now = datetime.now()
-            filename = filename + '_SAN' + now.strftime("%Y%m%d_%H%M%S")
-            out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
-            f=open(args.save_path + "LARs_SAN.txt","w")
+            filename = filename + now.strftime("_%Y%m%d_%H%M%S_") + 'SAN'
+            out = cv2.VideoWriter(self.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
+            f = open(self.save_path + filename + "LARs.txt","w")
             # process video
             while (VC.isOpened()):
                 # read frames
                 rval, frame = VC.read()
                 if rval:
+                    frame = imutils.resize(frame, width=640)
                     cv2.imwrite('frame.jpg', frame)
                     args = Args(image='frame.jpg')
                     lar, frame = evaluate(args)
@@ -107,12 +114,11 @@ class SAN_Args():
 
 
 class Args():
-    def __init__(self, image, face=None, save_path=None, cpu=False):
+    def __init__(self, image, face=None, cpu=False):
         self.image = image
         self.model = 'SAN/snapshots/SAN_300W_GTB_itn_cpm_3_50_sigma4_128x128x8/checkpoint_49.pth.tar'
         self.face = face
         self.locate_face()
-        self.save_path = save_path
         self.cpu = cpu
     
     def locate_face(self):
@@ -190,6 +196,7 @@ def evaluate(args):
     for i in range(param.num_pts):
         point = prediction[:, i]
         shape.append([round(point[0]), round(point[1])])
+        # shape.append([point[0], point[1]])
         print ('The coordinate of {:02d}/{:02d}-th points : ({:.1f}, {:.1f}), score = {:.3f}'.format(i, param.num_pts, float(point[0]), float(point[1]), float(point[2])))
     shape = np.array(shape)
     # locate lip region
@@ -197,14 +204,12 @@ def evaluate(args):
     # get lip aspect ratio
     lar = lip_aspect_ratio(lip)
     # image = draw_image_by_points(args.image, prediction, 1, (255,0,0), False, False)
+    # img = cv2.cvtColor(np.asarray(image),cv2.COLOR_RGB2BGR)
     img = cv2.imread(args.image)
     lip_shape = cv2.convexHull(lip)
     cv2.drawContours(img, [lip_shape], -1, (0, 255, 0), 1)
     if lar > HIGH_THRESHOLD or lar < LOW_THRESHOLD:
         cv2.putText(img, "Lip Motion Detected!", (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 1)                
-    if args.save_path:
-        cv2.imwrite(args.save_path + os.path.basename(args.image), img)
-        # print ('save image with landmarks into {:}'.format(args.save_path + os.path.basename(args.input)))
     print(lar)
     print('finish san evaluation on a single image : {:}'.format(args.image))
 
@@ -216,7 +221,6 @@ if __name__ == '__main__':
     parser.add_argument('--image',            type=str,   help='The evaluation image path.')
     parser.add_argument('--model',            type=str,   help='The snapshot to the saved detector.')
     parser.add_argument('--face',  nargs='+', type=float, help='The coordinate [x1,y1,x2,y2] of a face')
-    parser.add_argument('--save_path',        type=str,   help='The path to save the visualization results')
     parser.add_argument('--cpu',     action='store_true', help='Use CPU or not.')
     args = parser.parse_args()
     evaluate(args)

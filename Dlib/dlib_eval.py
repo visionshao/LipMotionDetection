@@ -65,6 +65,8 @@ def process_frame(frame):
 
         # get the shape of lip
         lip_shape = cv2.convexHull(lip)
+        print(lip_shape)
+        print(lar)
         cv2.drawContours(frame, [lip_shape], -1, (0, 255, 0), 1)
 
         # if open
@@ -85,8 +87,8 @@ def execute(args):
         img = cv2.imread(args.input)
         _, img = process_frame(img)
         now = datetime.now()
-        filename = filename + '_Dlib' + now.strftime("%Y%m%d_%H%M%S")
-        cv2.imwrite(args.save_path + filename + '_Dlib' + '.jpg', img)
+        filename = filename + now.strftime("_%Y%m%d_%H%M%S_") + 'Dlib'
+        cv2.imwrite(args.save_path + filename + '.jpg', img)
         cv2.imshow("Image", img)
         cv2.waitKey(1000)
         cv2.destroyAllWindows()
@@ -99,9 +101,9 @@ def execute(args):
         FRAME_WIDTH = int(VC.get(cv2.CAP_PROP_FRAME_WIDTH))
         FRAME_HEIGHT = int(VC.get(cv2.CAP_PROP_FRAME_HEIGHT))
         now = datetime.now()
-        filename = filename + '_Dlib' + now.strftime("%Y%m%d_%H%M%S")
+        filename = filename + now.strftime("_%Y%m%d_%H%M%S_") + 'Dlib'
         out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
-        f=open(args.save_path + "LARs_Dlib.txt","w")
+        f = open(args.save_path + filename + "LARs.txt","w")
         # process video
         while (VC.isOpened()):
             # read frames
@@ -136,7 +138,7 @@ def execute(args):
         FRAME_WIDTH = 640
         FRAME_HEIGHT = 380
         now = datetime.now()
-        filename = 'Camera_Dlib_' + now.strftime("%Y%m%d_%H%M%S")
+        filename = 'Camera' + now.strftime("_%Y%m%d_%H%M%S_") + 'Dlib'
         out = cv2.VideoWriter(args.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
         # process video
         while (VC.isOpened()):
