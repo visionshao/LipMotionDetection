@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 # use 68 key points face model
-SHAPE_PREDICTOR = "model/shape_predictor_68_face_landmarks.dat"
+SHAPE_PREDICTOR = "Dlib/model/shape_predictor_68_face_landmarks.dat"
 # define lip region
 (LIPFROM, LIPTO) = (48, 68)
 # define threshold for lip motion
