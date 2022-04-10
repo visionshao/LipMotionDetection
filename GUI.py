@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.filedialog
 from Dlib import dlib_eval
 import time
+import os
 import sys
 sys.path.append('SAN')
 import san_eval
@@ -70,7 +71,7 @@ r_btn_input_3.place(x=400, y=155)
 
 
 # upload media
-def selectPath():
+def selectUploadPath():
     path_ = tkinter.filedialog.askopenfilename()
     upload_path.set(path_)
 upload_path = tk.StringVar()
@@ -78,27 +79,34 @@ label_upload = tk.Label(window, text = "3. File Path:", font=('Arial', 14))
 label_upload.place(x=10, y=225)
 entry_upload_path = tk.Entry(window, font=('Arial', 14), textvariable=upload_path)
 entry_upload_path.place(x=120, y=227, width=350)
-btn_upload = tk.Button(window, text = "Select File", font=('Arial', 14), width=10, command=selectPath)
+btn_upload = tk.Button(window, text="Select File", font=('Arial', 14), width=10, command=selectUploadPath)
 btn_upload.place(x=480, y=220)
 
 
 # set saved path
+def selectSavePath():
+    path_ = tkinter.filedialog.askdirectory()
+    save_path.set(path_ + '/')
 tk.Label(window, text='4. Saved Path:', font=('Arial', 14)).place(x=10, y=315)
-saved_path = tk.StringVar()
-saved_path.set('processed_media/')
-entry_saved_path = tk.Entry(window, textvariable=saved_path, font=('Arial', 14))
-entry_saved_path.place(x=140, y=317, width=350)
-
+default_save_path = 'processed_media/'
+if not os.path.exists(default_save_path):
+    os.makedirs(default_save_path)
+save_path = tk.StringVar()
+save_path.set(default_save_path)
+entry_save_path = tk.Entry(window, font=('Arial', 14), textvariable=save_path)
+entry_save_path.place(x=140, y=317, width=330)
+btn_upload = tk.Button(window, text="Select Folder", font=('Arial', 14), width=10, command=selectSavePath)
+btn_upload.place(x=480, y=310)
 
 # process button
 def precess():
     if method_type.get() == 'Dlib':
-        args = dlib_eval.Dlib_Args(input_type=input_type.get(), input=upload_path.get(), save_path=saved_path.get())
+        args = dlib_eval.Dlib_Args(input_type=input_type.get(), input=upload_path.get(), save_path=save_path.get())
         start = time.time()
         dlib_eval.execute(args)
         end = time.time()
     else:
-        args = san_eval.SAN_Args(input_type=input_type.get(), input=upload_path.get(), save_path=saved_path.get())
+        args = san_eval.SAN_Args(input_type=input_type.get(), input=upload_path.get(), save_path=save_path.get())
         start = time.time()
         args.execute()
         end = time.time()
