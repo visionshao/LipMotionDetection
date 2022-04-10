@@ -80,7 +80,7 @@ class SAN_Args():
             now = datetime.now()
             filename = filename + now.strftime("_%Y%m%d_%H%M%S_") + 'SAN'
             out = cv2.VideoWriter(self.save_path + filename + '.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE, (FRAME_WIDTH, FRAME_HEIGHT))
-            f = open(self.save_path + filename + "LARs.txt","w")
+            f = open(self.save_path + filename + "_LARs.txt","w")
             # process video
             while (VC.isOpened()):
                 # read frames
@@ -95,13 +95,13 @@ class SAN_Args():
                     # write into output video
                     frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT), interpolation = cv2.INTER_AREA)
                     out.write(frame)
-                    # # show the frame
-                    # cv2.imshow("Frame", frame)
-                    # # control imshow lasting time
-                    # key = cv2.waitKey(1) & 0xFF
-                    # # quit
-                    # if key == ord("q"):
-                    #     break
+                    # show the frame
+                    cv2.imshow("Frame", frame)
+                    # control imshow lasting time
+                    key = cv2.waitKey(1) & 0xFF
+                    # quit
+                    if key == ord("q"):
+                        break
                 else:
                     break
             # cleanup

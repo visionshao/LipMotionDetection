@@ -26,18 +26,20 @@ method_type = tk.StringVar()
 label_method = tk.Label(window, font=('Arial', 14), text='1. Please select the method:')
 label_method.place(x=10, y=10)
 # method selection function
-def set_Dlib():
-    r_btn_input_3['state'] = 'normal'
-def set_SAN():
-    r_btn_input_3['state'] = 'disabled'
-    if input_type.get() == 'Camera':
-        input_type.set('Image')
-        set_Image()
+# def set_Dlib():
+#     r_btn_input_3['state'] = 'normal'
+# def set_SAN():
+#     r_btn_input_3['state'] = 'disabled'
+#     if input_type.get() == 'Camera':
+#         input_type.set('Image')
+#         set_Image()
 # radiobutton_method
 method_type.set('Dlib')
-r_btn_method_1 = tk.Radiobutton(window, font=('Arial', 14), text='Dlib', variable=method_type, value='Dlib', command=set_Dlib)
+# r_btn_method_1 = tk.Radiobutton(window, font=('Arial', 14), text='Dlib', variable=method_type, value='Dlib', command=set_Dlib)
+r_btn_method_1 = tk.Radiobutton(window, font=('Arial', 14), text='Dlib', variable=method_type, value='Dlib')
 r_btn_method_1.place(x=100, y=40)
-r_btn_method_2 = tk.Radiobutton(window, font=('Arial', 14), text='SAN', variable=method_type, value='SAN', command=set_SAN)
+# r_btn_method_2 = tk.Radiobutton(window, font=('Arial', 14), text='SAN', variable=method_type, value='SAN', command=set_SAN)
+r_btn_method_2 = tk.Radiobutton(window, font=('Arial', 14), text='SAN', variable=method_type, value='SAN')
 r_btn_method_2.place(x=250, y=40)
 
 
@@ -45,7 +47,7 @@ r_btn_method_2.place(x=250, y=40)
 input_type = tk.StringVar()
 label_input = tk.Label(window, font=('Arial', 14), text='2. Please select the input type:')
 label_input.place(x=10, y=100)
-label_input_notice = tk.Label(window, font=('Arial', 14), text='  (NOTICE that SAN now does NOT support camera input.)')
+label_input_notice = tk.Label(window, font=('Arial', 14), text='  (NOTICE that SAN requires GPUs.)')
 label_input_notice.place(x=10, y=125)
 # input selection function
 def set_Image():
@@ -74,9 +76,9 @@ def selectPath():
 upload_path = tk.StringVar()
 label_upload = tk.Label(window, text = "3. File Path:", font=('Arial', 14))
 label_upload.place(x=10, y=225)
-entry_upload_path = tk.Entry(window, font=('Arial', 14), textvariable = upload_path)
+entry_upload_path = tk.Entry(window, font=('Arial', 14), textvariable=upload_path)
 entry_upload_path.place(x=120, y=227, width=350)
-btn_upload = tk.Button(window, text = "Select File", font=('Arial', 14), width=10, command = selectPath)
+btn_upload = tk.Button(window, text = "Select File", font=('Arial', 14), width=10, command=selectPath)
 btn_upload.place(x=480, y=220)
 
 
@@ -104,17 +106,18 @@ def precess():
     hour = int(seconds / 3600)
     minute = int(seconds % 3600 / 60)
     second = int(seconds % 60)
-    topw, toph = 300, 100
+    topw, toph = 310, 100
     ctpx = int(sw / 2 - topw / 2)
     ctpy = int(sh / 2 - toph / 2)
     top = tk.Toplevel(window)
     top.geometry(f"{topw}x{toph}+{ctpx}+{ctpy}")
     top.title('Notice')
-    finish_top = tk.Label(top, font=('Arial', 14), text= str(hour) + 'h:' + str(minute) + "m:" + str(second) + 's. ')
-    # finish_top = tk.Label(top, font=('Arial', 14), text=' Process completed in ' + str(hour) + 'h:' + str(minute) + "m:" + str(second) + 's. ')
+    # finish_top = tk.Label(top, font=('Arial', 14), text= str(hour) + 'h ' + str(minute) + "m " + str(second) + 's. ')
+    finish_top = tk.Label(top, font=('Arial', 14), text=' Process completed in ' + str(hour) + 'h ' + str(minute) + "m " + str(second) + 's. ')
     finish_top.place(x=10, y=10)
     btn_ok = tk.Button(top, font=('Arial', 14), text="OK", width=8, command=top.destroy)
-    btn_ok.place(x=90, y=50)
+    btn_ok.place(x=100, y=50)
+    entry_upload_path.delete(0,'end')
 
 btn_process = tk.Button(window, font=('Arial', 14), text="Process", width=10, command=precess)
 btn_process.place(x=120, y=370)
