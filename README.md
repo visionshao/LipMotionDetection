@@ -4,7 +4,7 @@ This project uses two methods (Dlib and SAN) to do lip motion detection.
 ## Preparation
 
 ### Environment
-I prepare the `LMD_env..yaml` for you. You can run `conda env create -f LMD_env.yaml` to create the environment.
+I prepare the `LMD_env.yaml` for you. You can run `conda env create -f LMD_env.yaml` to create the environment.
 
 ### Datasets Download
 Please open the folder of the each method to view the detailed description.
