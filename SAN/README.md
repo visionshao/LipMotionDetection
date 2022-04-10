@@ -1,6 +1,6 @@
 # [Style Aggregated Network for Facial Landmark Detection](http://openaccess.thecvf.com/content_cvpr_2018/html/Dong_Style_Aggregated_Network_CVPR_2018_paper.html)
 
-This method is proposed by the upper paper. 
+This method is proposed by the upper paper.
 
 ## Preparation
 
@@ -67,7 +67,7 @@ python crop_pic.py
 The above commands will pre-crop the face images, and save them into `./cache_data/cache/300W` and `./cache_data/cache/AFLW`.
 
 
-## Training and Evaluation
+## Training
 
 ### 300-W
 - Step-1 : cluster images into different groups. For example, running `bash scripts/300W/300W_Cluster.sh 0,1 GTB 3` will generate three file lists into `snapshots/CLUSTER-300W_GTB-3`.
