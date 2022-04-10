@@ -1,5 +1,4 @@
 # Lip Motion Detection
-Final Year Project
 This project uses two methods (Dlib and SAN) to do lip motion detection.
 
 ## Preparation
