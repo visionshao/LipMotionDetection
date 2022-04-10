@@ -8,7 +8,10 @@ from datetime import datetime
 
 
 # use 68 key points face model
-SHAPE_PREDICTOR = "Dlib/model/shape_predictor_68_face_landmarks.dat"
+model_path = 'model/shape_predictor_68_face_landmarks.dat'
+if os.path.exists('Dlib/'):
+    model_path = 'Dlib/' + model_path
+SHAPE_PREDICTOR = model_path
 # define lip region
 (LIPFROM, LIPTO) = (48, 68)
 # define threshold for lip motion
