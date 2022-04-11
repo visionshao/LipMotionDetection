@@ -5,7 +5,7 @@ import time
 import os
 import sys
 sys.path.append('SAN')
-import san_eval
+from SAN import san_eval
 
 
 # create window
