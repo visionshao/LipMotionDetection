@@ -95,8 +95,8 @@ save_path = tk.StringVar()
 save_path.set(default_save_path)
 entry_save_path = tk.Entry(window, font=('Arial', 14), textvariable=save_path)
 entry_save_path.place(x=140, y=317, width=330)
-btn_upload = tk.Button(window, text="Select Folder", font=('Arial', 14), width=10, command=selectSavePath)
-btn_upload.place(x=480, y=310)
+btn_save = tk.Button(window, text="Select Folder", font=('Arial', 14), width=10, command=selectSavePath)
+btn_save.place(x=480, y=310)
 
 # process button
 def precess():
