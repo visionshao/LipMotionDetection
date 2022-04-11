@@ -13,7 +13,7 @@ model_path = 'model/shape_predictor_68_face_landmarks.dat'
 if os.path.exists('Dlib/'):
     model_path = 'Dlib/' + model_path
 if not os.path.exists(model_path):
-    # url = 'https://drive.google.com/file/d/1AwHKa2-QpcqkFgqTbOLoRoNBDVXfTZ05/view?usp=sharing'
+    # You canalso click this link to download 'https://drive.google.com/file/d/1AwHKa2-QpcqkFgqTbOLoRoNBDVXfTZ05/view?usp=sharing'
     url = 'https://drive.google.com/uc?id=1AwHKa2-QpcqkFgqTbOLoRoNBDVXfTZ05'
     gdown.download(url, model_path, quiet=False)
 SHAPE_PREDICTOR = model_path
